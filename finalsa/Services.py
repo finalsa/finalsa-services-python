@@ -1,6 +1,6 @@
 from .utils import verify_phone, request_to_api
 from json import dumps
-from datetime import datetime
+from datetime import datetime, timedelta
 from .Exceptions import AuthException
 
 
@@ -13,7 +13,8 @@ class Services():
         super().__init__()
         self.url = url
         self.api_key = api_key
-        self.auth_key = self.get_auth_key(api_key)
+        self.auth_key = ''
+        self.auth_date = datetime.now()
 
     def get_auth_key(self, api_key):
         headers = {
@@ -31,6 +32,9 @@ class Services():
         raise AuthException()
 
     def get_headers(self, ):
+        auth_date = self.auth_date + timedelta(hours = 23, minutes= 59)
+        if(self.auth_key == '' or auth_date < datetime.now()):
+            self.auth_key =  self.get_auth_key(self.api_key)
         headers = {
             'Content-Type': 'application/json',
             'Token': self.api_key,
@@ -74,13 +78,15 @@ class Services():
         r = request_to_api(url, "POST", headers, payload)
         return r
 
-    def single_recharge(self, type_id,  phone):
+    def single_recharge(self, type_id,  phone, should_wait_time = 5, url = '', data = {} ):
         url = self.url + '/recharge/'
         headers = self.get_headers()
         payload = {
             'recharge_type_id': type_id,
             'phone': phone,
-            'should_wait_time': 5
+            'url' : url,
+            'data' : data,
+            'should_wait_time': should_wait_time,
         }
         r = request_to_api(url, "POST", headers, payload)
         return r
