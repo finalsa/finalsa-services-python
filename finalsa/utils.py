@@ -1,4 +1,5 @@
 import requests
+from json import dumps
 from .Exceptions import ServicesApiException
 
 def verify_phone(phone):
@@ -14,7 +15,7 @@ def request_to_api(url, method,  headers={}, params={}, files=[], timeout=3000, 
             method,
             url,
             headers=headers,
-            data=params,
+            data= dumps(params),
             files=files,
             timeout=timeout
         )
