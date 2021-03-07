@@ -100,19 +100,14 @@ class Services():
         r = request_to_api(url, "POST", headers, payload)
         return r
 
-    def single_recharge(self, type_id,  phone, should_wait_time = 5, url_webhook = '', token = ''  , data = {}):
-        url = self.url + '/recharge/'
-        headers = self.get_headers()
+    def single_recharge(self, type_id,  phone, should_wait_time = 5, hook:Webhook  = None ):
         payload = {
             'recharge_type_id': type_id,
             'phone': phone,
-            'url' : url_webhook,
-            'data' : data,
-            'token' : token,
             'should_wait_time': should_wait_time,
         }
-        r = request_to_api(url, "POST", headers, payload)
-        return r
+        res = self.call_service('teria_telcel', payload, hook)
+        return res
 
     def get_recharge_types(self,):
         url = self.url + '/recharge_types/'

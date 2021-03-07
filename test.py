@@ -1,9 +1,13 @@
 from finalsa import Services, Webhook
 
-services = Services("http://0.0.0.0:5001", 'YkhWcGN6SXhPRFEzT0RVMU9ERXdPVFF4TmpVMk56TXlOdz09')
+token = "YkhWcGN6SXhPRFEzT0RVMU9ERXdPVFF4TmpVMk56TXlOdz09"
+services = Services("http://192.168.1.113:5001", token)
+#services = Services("http://0.0.0.0:5001", token)
 
+device_token  = "0289704490f24ef01366b7efd5e2588c7f17a6f77574f5626eb45e428a32723e"
 def test_apn():
-    r = services.send_apn("com.finalsa.Server-Managment", {
+    topic = "com.finalsa.Server-Managment"
+    r = services.send_apn( topic, {
             "alert" : {
                 "title" : "Alerta",
                 "subtitle" : "prubea",
@@ -11,9 +15,9 @@ def test_apn():
             },
             "sound" : "default",
             "badge" : 1
-        }, "0289704490f24ef01366b7efd5e2588c7f17a6f77574f5626eb45e428a32723e",)
+        }, device_token,)
     print(r)
-    r = services.send_apn("com.finalsa.Server-Managment", {
+    r = services.send_apn(topic, {
             "alert" : {
                 "title" : "Alerta",
                 "subtitle" : "prubea",
@@ -22,7 +26,7 @@ def test_apn():
             "sound" : "default",
             "badge" : 1
         }, 
-        "0289704490f24ef01366b7efd5e2588c7f17a6f77574f5626eb45e428a32723e",
+        device_token,
         hook= Webhook('http://localsdsdk:5001', '', { 'sadasd' :'ad'})
     )
     print(r)
@@ -34,6 +38,11 @@ def test_calixta():
     )
     print(r)
 
+def test_recharge():
+    r = services.single_recharge(
+        "INT5", "5543670621", 
+    )
+    print(r)
 
 
-test_apn()
+test_recharge()
