@@ -1,7 +1,7 @@
 from .utils import verify_phone, request_to_api, call_service
 from json import dumps
 from datetime import datetime, timedelta
-from .Exceptions import AuthException
+from .Exceptions import AuthException, ServiceException
 from .Webhook import Webhook
 
 class Services():
@@ -45,16 +45,12 @@ class Services():
     def call_service(self, name, payload, hook:Webhook  = None):
         res = {}
         if(hook is not None):
-            data = {
-                **hook.to_dict(),
-                **payload
-            }
-            res = call_service(self.url, self.get_headers(), name, data)
-        else: 
-            res = call_service(self.url, self.get_headers(), name, payload)
+            payload['hook'] = hook.to_dict()
+        print(payload)
+        res = call_service(self.url, self.get_headers(), name, payload)
         if(res['status'] == "finished"):
             return res['result']
-        raise Exception(message = res['result'])
+        raise ServiceException(message = res['result'])
     
     def send_apn(self, topic, payload, uuid, sandbox = True, hook:Webhook  = None):
         data = {
