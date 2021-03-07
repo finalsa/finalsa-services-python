@@ -1,8 +1,8 @@
-from .utils import verify_phone, request_to_api
+from .utils import verify_phone, request_to_api, call_service
 from json import dumps
 from datetime import datetime, timedelta
 from .Exceptions import AuthException
-
+from .Webhook import Webhook
 
 class Services():
 
@@ -42,6 +42,54 @@ class Services():
         }
         return headers
 
+    def call_service(self, name, payload, hook:Webhook  = None):
+        res = {}
+        if(hook is not None):
+            data = {
+                **hook.to_dict(),
+                **payload
+            }
+            res = call_service(self.url, self.get_headers(), name, data)
+        else: 
+            res = call_service(self.url, self.get_headers(), name, payload)
+        if(res['status'] == "finished"):
+            return res['result']
+        raise Exception(message = res['result'])
+    
+    def send_apn(self, topic, payload, uuid, sandbox = True, hook:Webhook  = None):
+        data = {
+            'topic' : topic,
+            'uuid' : uuid,
+            'sandbox': sandbox,
+            'payload' : payload
+        }
+        res = self.call_service('apns', data, hook)
+        return res
+    
+    def send_sms(self, to, message, hook:Webhook  = None):
+        return self.send_calixta_sms(to, message, hook)
+    
+    def send_calixta_sms(self, to, message, hook:Webhook  = None):
+        to = verify_phone(to)
+        payload = {
+            'to' : to,
+            'message' : message
+        }
+        res = self.call_service('calixta_sms', payload, hook)
+        return res
+    
+    def call(self, to, message , hook:Webhook  = None):
+        return self.send_calixta_call(to, message, hook)
+    
+    def send_calixta_call(self, to, message, hook:Webhook  = None):
+        to = verify_phone(to)
+        payload = {
+            'to' : to,
+            'message' : message
+        }
+        res = self.call_service('calixta_call', payload, hook)
+        return res
+
     def send_campaing(self, typ, service_id, webhook, template, name, attributes):
         headers = self.get_headers()
         url = self.url + '/create_campaing/'
@@ -53,28 +101,6 @@ class Services():
             'template': template,
             'name': name
         }
-        r = request_to_api(url, "POST", headers, payload)
-        return r
-
-    def call_service(self, service_id, payload):
-        url = self.url + '/service/{}'.format(str(service_id))
-        headers = self.get_headers()
-        r = request_to_api(url, "POST", headers, payload)
-        return r
-
-    def send_sms(self, to, message):
-        url = self.url + '/sms/'
-        headers = self.get_headers()
-        payload = {
-            'to' : to,
-            'message' : message
-        }
-        r = request_to_api(url, "POST", headers, payload)
-        return r
-
-    def send_call(self, payload):
-        url = self.url + '/call/'
-        headers = self.get_headers()
         r = request_to_api(url, "POST", headers, payload)
         return r
 

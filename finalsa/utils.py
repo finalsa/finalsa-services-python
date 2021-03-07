@@ -9,6 +9,11 @@ def verify_phone(phone):
     return res
 
 
+def call_service(url, headers, service_name, payload):
+    _url = url + '/service/{}'.format(service_name)
+    r = request_to_api(_url, "POST", headers, payload)
+    return r
+
 def request_to_api(url, method,  headers={}, params={}, files=[], timeout=3000, exception=ServicesApiException, debug=False):
     try:
         response = requests.request(
