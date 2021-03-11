@@ -3,6 +3,7 @@ from json import dumps
 from datetime import datetime, timedelta
 from .Exceptions import AuthException, ServiceException
 from .Webhook import Webhook
+from typing import List, Optional, Union
 
 class Services():
 
@@ -104,6 +105,16 @@ class Services():
         payload = {
             'recharge_type_id': type_id,
             'phone': phone,
+            'should_wait_time': should_wait_time,
+        }
+        res = self.call_service('teria_telcel', payload, hook)
+        return res
+
+
+    def massive_recharge(self, type_id, phones, should_wait_time = 5, hook: Optional[Union[Webhook,List[Webhook]]  = None ):
+        payload = {
+            'recharge_type_id': type_id,
+            'phones': phones,
             'should_wait_time': should_wait_time,
         }
         res = self.call_service('teria_telcel', payload, hook)
