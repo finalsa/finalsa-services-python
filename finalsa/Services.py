@@ -111,13 +111,13 @@ class Services():
         return res
 
 
-    def massive_recharge(self, type_id, phones, should_wait_time = 5, hook: Optional[Union[Webhook,List[Webhook]]  = None ):
+    def massive_recharge(self, type_id, phones, should_wait_time = 5, hooks: Optional[Union[Webhook,List[Webhook]]]= None ):
         payload = {
             'recharge_type_id': type_id,
             'phones': phones,
             'should_wait_time': should_wait_time,
         }
-        res = self.call_service('teria_telcel', payload, hook)
+        res = self.call_service('teria_telcel', payload, hooks)
         return res
 
     def get_recharge_types(self,):
