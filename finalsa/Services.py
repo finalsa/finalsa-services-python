@@ -63,6 +63,23 @@ class Services():
         res = self.call_service('apns', data, hook)
         return res
     
+    def send_notification(self, topic, payload, uuid, sandbox = True, hook:Webhook  = None):
+        return self.send_apn(topic, payload, uuid, sandbox, hook)
+    
+
+    def send_email(self, _from, _to, subject, message = '', files = [],  content = [], hook:Webhook  = None):
+        data = {
+            'sender' :  _from,
+            'receiver' : _to,
+            'subject' : subject,
+            'message': message,
+            'content' : content,
+            'files' : files
+        }
+        res = self.call_service("email", data, hook)
+        return res
+
+    
     def send_sms(self, to, message, hook:Webhook  = None):
         return self.send_calixta_sms(to, message, hook)
     

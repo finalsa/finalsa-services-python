@@ -1,8 +1,8 @@
 from finalsa import Services, Webhook
 
 token = "YkhWcGN6SXhPRFEzT0RVMU9ERXdPVFF4TmpVMk56TXlOdz09"
-services = Services("http://192.168.1.113:5001", token)
-#services = Services("http://0.0.0.0:5001", token)
+#services = Services("http://192.168.1.113:5001", token)
+services = Services("http://0.0.0.0:5001", token)
 
 device_token  = "0289704490f24ef01366b7efd5e2588c7f17a6f77574f5626eb45e428a32723e"
 def test_apn():
@@ -44,5 +44,16 @@ def test_recharge():
     )
     print(r)
 
+def test_email():
+    r = services.send_email(
+        'Luis<luis@finalsa.com>', "luisjimenez6245@hotmail.com",
+        "prueba", "holaaa", content = [
+            {
+                'text' : '<html><body><b>aaaa</b></body></html>'
+            }
+        ]
+    )
+    print(r)
 
-test_recharge()
+
+test_email()
