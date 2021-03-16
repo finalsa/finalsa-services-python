@@ -32,7 +32,7 @@ def get_packages(package):
 
 
 setup(
-    name='finalsa-services-connector',
+    name=PACKAGE,
     version='1.0.0',
     url='https://github.com/finalsa/finalsa-flask-models/',
     long_description=get_long_description(),
