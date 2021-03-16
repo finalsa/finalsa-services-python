@@ -1,8 +1,9 @@
-from .utils import verify_phone, request_to_api
+from .utils import verify_phone, request_to_api, call_service
 from json import dumps
 from datetime import datetime, timedelta
-from .Exceptions import AuthException
-
+from .Exceptions import AuthException, ServiceException
+from .Webhook import Webhook
+from typing import List, Optional, Union
 
 class Services():
 
@@ -42,6 +43,67 @@ class Services():
         }
         return headers
 
+    def call_service(self, name, payload, hook:Webhook  = None):
+        res = {}
+        if(hook is not None):
+            payload['hook'] = hook.to_dict()
+        print(payload)
+        res = call_service(self.url, self.get_headers(), name, payload)
+        if(res['status'] == "finished"):
+            return res['result']
+        raise ServiceException(message = res['result'])
+    
+    def send_apn(self, topic, payload, uuid, sandbox = True, hook:Webhook  = None):
+        data = {
+            'topic' : topic,
+            'uuid' : uuid,
+            'sandbox': sandbox,
+            'payload' : payload
+        }
+        res = self.call_service('apns', data, hook)
+        return res
+    
+    def send_notification(self, topic, payload, uuid, sandbox = True, hook:Webhook  = None):
+        return self.send_apn(topic, payload, uuid, sandbox, hook)
+    
+
+    def send_email(self, _from, _to, subject, message = '', files = [],  content = [], hook:Webhook  = None):
+        data = {
+            'sender' :  _from,
+            'receiver' : _to,
+            'subject' : subject,
+            'message': message,
+            'content' : content,
+            'files' : files
+        }
+        res = self.call_service("email", data, hook)
+        return res
+
+    
+    def send_sms(self, to, message, hook:Webhook  = None):
+        return self.send_calixta_sms(to, message, hook)
+    
+    def send_calixta_sms(self, to, message, hook:Webhook  = None):
+        to = verify_phone(to)
+        payload = {
+            'to' : to,
+            'message' : message
+        }
+        res = self.call_service('calixta_sms', payload, hook)
+        return res
+    
+    def call(self, to, message , hook:Webhook  = None):
+        return self.send_calixta_call(to, message, hook)
+    
+    def send_calixta_call(self, to, message, hook:Webhook  = None):
+        to = verify_phone(to)
+        payload = {
+            'to' : to,
+            'message' : message
+        }
+        res = self.call_service('calixta_call', payload, hook)
+        return res
+
     def send_campaing(self, typ, service_id, webhook, template, name, attributes):
         headers = self.get_headers()
         url = self.url + '/create_campaing/'
@@ -56,41 +118,24 @@ class Services():
         r = request_to_api(url, "POST", headers, payload)
         return r
 
-    def call_service(self, service_id, payload):
-        url = self.url + '/service/{}'.format(str(service_id))
-        headers = self.get_headers()
-        r = request_to_api(url, "POST", headers, payload)
-        return r
-
-    def send_sms(self, to, message):
-        url = self.url + '/sms/'
-        headers = self.get_headers()
-        payload = {
-            'to' : to,
-            'message' : message
-        }
-        r = request_to_api(url, "POST", headers, payload)
-        return r
-
-    def send_call(self, payload):
-        url = self.url + '/call/'
-        headers = self.get_headers()
-        r = request_to_api(url, "POST", headers, payload)
-        return r
-
-    def single_recharge(self, type_id,  phone, should_wait_time = 5, url_webhook = '', token = ''  , data = {}):
-        url = self.url + '/recharge/'
-        headers = self.get_headers()
+    def single_recharge(self, type_id,  phone, should_wait_time = 5, hook:Webhook  = None ):
         payload = {
             'recharge_type_id': type_id,
             'phone': phone,
-            'url' : url_webhook,
-            'data' : data,
-            'token' : token,
             'should_wait_time': should_wait_time,
         }
-        r = request_to_api(url, "POST", headers, payload)
-        return r
+        res = self.call_service('teria_telcel', payload, hook)
+        return res
+
+
+    def massive_recharge(self, type_id, phones, should_wait_time = 5, hooks: Optional[Union[Webhook,List[Webhook]]]= None ):
+        payload = {
+            'recharge_type_id': type_id,
+            'phones': phones,
+            'should_wait_time': should_wait_time,
+        }
+        res = self.call_service('teria_telcel', payload, hooks)
+        return res
 
     def get_recharge_types(self,):
         url = self.url + '/recharge_types/'
