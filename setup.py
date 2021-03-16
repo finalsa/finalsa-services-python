@@ -45,7 +45,6 @@ setup(
     package_data={PACKAGE: ["py.typed"]},
     zip_safe=False,
     include_package_data=True,
-    zip_safe=False,
     platforms='any',
     install_requires=[
         'requests',
