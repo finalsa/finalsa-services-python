@@ -1,7 +1,7 @@
 import os
 import re
 
-PACKAGE = "finalsa"
+PACKAGE = "finalsa-flask"
 
 from setuptools import setup
 
